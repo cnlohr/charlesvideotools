@@ -66,9 +66,9 @@ void setup_output( int codec_id )
 	 * then gop_size is ignored and the output of encoder
 	 * will always be I frame irrespective to gop_size
 	 */
-	c->bit_rate = 10000000;
+	c->bit_rate = 19000000;
 	c->gop_size = 10;
-	c->global_quality = 19;
+	c->global_quality = 1;
 	c->max_b_frames = 1;
 
 	printf( "TIMEBASE %d/%d\n", c->pkt_timebase.num, c->pkt_timebase.den );
@@ -233,7 +233,7 @@ int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, i
 #endif
 
 	}
-	if( gframe > 400 ) return 1;
+//	if( gframe > 400 ) return 1;
 	maxframe = gframe;
 	return 0;
 }
