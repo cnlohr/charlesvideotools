@@ -157,6 +157,7 @@ void finish_output()
 
 ///////////////////////////////
 uint32_t * rgbaccumbuffer;
+uint8_t * tmpbuff;
 
 int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, int height, int frameno )
 {
@@ -166,6 +167,8 @@ int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, i
 	{
 		setup_output(  AV_CODEC_ID_H264 );//AV_CODEC_ID_MPEG1VIDEO ); 
 		rgbaccumbuffer = calloc( gwidth * gheight, 3 * 4 );
+		tmpbuff = malloc( gwidth * gheight * 3 + 1000000 );
+		printf( "CALLOCING BUFFER\n" );
 	}
 	printf( "Frame %d\n", gframe );
 
@@ -179,7 +182,6 @@ int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, i
 
 	if( gframe % speedup_ratio  == 0 )
 	{
-		uint8_t tmpbuff[gwidth*gheight*3];
 		av_init_packet(&pkt);
 		pkt.data = NULL;    // packet data will be allocated by the encoder
 		pkt.size = 0;
@@ -217,7 +219,6 @@ int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, i
 
 		    printf("Write frame %3d (size=%5d)\n", outframe, pkt.size);
 		    fwrite(pkt.data, 1, pkt.size, f);
-		    av_free_packet(&pkt);
 		}
 #else
 		ret = avcodec_encode_video(c, outbuf, sizeof(outbuf), frame);
@@ -226,9 +227,9 @@ int got_video_frame( const unsigned char * rgbbuffer, int linesize, int width, i
 
 		    printf("Write frame %3d (size=%5d)\n", outframe, ret);
 		    fwrite(outbuf, 1, ret, f);
-		    av_free_packet(&pkt);
 		}
 
+		    av_free_packet(&pkt);
 
 #endif
 
@@ -254,4 +255,6 @@ int main( int argc, char ** argv )
 	video_decode( argv[1] );
 	finish_output();
 	printf( "Done\n" );
+	printf( "Don't forget to fix indexes:  mencoder -idx -ovc copy -oac copy %s -o ...\n", outname );
+	printf( "... or ... mencoder -idx -ovc copy -oac copy -o -of lavf %s -o [...].mpg [-speed 50%%]\n", outname );
 }
